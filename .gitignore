@@ -17,3 +17,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+x-ui-english.db
+x-ui-laravel.db
