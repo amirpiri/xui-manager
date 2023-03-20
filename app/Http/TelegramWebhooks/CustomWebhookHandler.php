@@ -36,15 +36,17 @@ class CustomWebhookHandler extends WebhookHandler
                     ->first();
 
                 $remainingGigaBytes = $clientData['totalGB'] - ($clientTraffic['up'] + $clientTraffic['down']);
-                $expiryTime = Carbon::createFromTimestamp($clientData['expiryTime'] / 1000);
-                $expiryTime = Jalalian::fromCarbon($expiryTime)->format('%A, %d %B %Y');
+                if (!empty($clientData['expiryTime'])) {
+                    $expiryTime = Carbon::createFromTimestamp($clientData['expiryTime'] / 1000);
+                    $expiryTime = Jalalian::fromCarbon($expiryTime)->format('%A, %d %B %Y');
+                }
 
                 $this->chat->message(
                     __(
                         'telegram_bot.user_data',
                         [
                             'remaining' => $this->formatBytes($remainingGigaBytes),
-                            'expiryDate' => $expiryTime,
+                            'expiryDate' => $expiryTime ?? '',
                             'email' => $clientData['email'],
                         ]
                     )
