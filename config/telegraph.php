@@ -120,5 +120,6 @@ return [
 
     'xui' => [
         'inbounds' => explode(',', env('XUI_INBOUNDS', '1')),
+        'support_telegram_account' => env('XUI_SUPPORT_TELEGRAM_ACCOUNT'),
     ]
 ];

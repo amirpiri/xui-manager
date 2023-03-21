@@ -35,7 +35,7 @@ class CustomWebhookHandler extends WebhookHandler
                     ->where('email', $clientData['email'])
                     ->first();
 
-                $remainingGigaBytes = $clientData['totalGB'] - ($clientTraffic['up'] + $clientTraffic['down']);
+                $remainingTraffic = $clientTraffic['total'] - ($clientTraffic['up'] + $clientTraffic['down']);
                 if (!empty($clientData['expiryTime'])) {
                     $expiryTime = Carbon::createFromTimestamp($clientData['expiryTime'] / 1000);
                     $expiryTime = Jalalian::fromCarbon($expiryTime)->format('%A, %d %B %Y');
@@ -45,7 +45,7 @@ class CustomWebhookHandler extends WebhookHandler
                     __(
                         'telegram_bot.user_data',
                         [
-                            'remaining' => $this->formatBytes($remainingGigaBytes),
+                            'remaining' => formatBytes($remainingTraffic),
                             'expiryDate' => $expiryTime ?? '',
                             'email' => $clientData['email'],
                         ]
@@ -56,6 +56,8 @@ class CustomWebhookHandler extends WebhookHandler
                 ])->chunk(2))->send();
 
                 $this->chat->client_uuid = $clientData['id'];
+                $this->chat->inbound_id = $inbound->id;
+                $this->chat->email = $clientData['email'];
                 $this->chat->save();
 
 //                if (!$this->chat->active_alert) {
@@ -120,20 +122,6 @@ class CustomWebhookHandler extends WebhookHandler
     protected function handleUnknownCommand(Stringable $text): void
     {
         $this->chat->message(__('telegram_bot.i_cant_understand_your_command') . ' ' . $text)->send();
-    }
-
-    private function formatBytes($bytes, $precision = 2) {
-        $units = array('B', 'KB', 'MB', 'GB', 'TB');
-
-        $bytes = max($bytes, 0);
-        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-        $pow = min($pow, count($units) - 1);
-
-        // Uncomment one of the following alternatives
-         $bytes /= pow(1024, $pow);
-        // $bytes /= (1 << (10 * $pow));
-
-        return round($bytes, $precision) . ' ' . $units[$pow];
     }
 
     public function yes()
