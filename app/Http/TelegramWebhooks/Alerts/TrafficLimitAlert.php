@@ -19,12 +19,18 @@ class TrafficLimitAlert
             try {
                 if (!empty($chat->email) and !is_null($clientTraffic = ClientTraffic::where('email', $chat->email)->first())) {
 
+                    if (is_null($chat->traffic_limit_notified_at)) {
+                        $checkAlertTimeLimit = true;
+                    } else {
+                        $checkAlertTimeLimit = Carbon::parse($chat->traffic_limit_notified_at)->addHours(2)->isPast();
+                    }
+
                     \Log::debug('$clientData => ', $clientTraffic->toArray());
 
                     if (!empty($clientTraffic['expiry_time'])) {
                         $expiryTime = Carbon::createFromTimestamp($clientTraffic['expiry_time'] / 1000);
                         \Log::debug($expiryTime);
-                        if ($expiryTime->diffInHours(Carbon::now()) <= 24) {
+                        if ($expiryTime->diffInHours(Carbon::now()) <= 24 and $checkAlertTimeLimit) {
                             \Log::debug('your_account_will_be_expire_in_24_hours');
                             $chat->message(
                                 __(
@@ -40,12 +46,6 @@ class TrafficLimitAlert
 
                     $remainingTraffic = $clientTraffic['total'] - ($clientTraffic['up'] + $clientTraffic['down']);
                     \Log::debug('remaining traffic => ' . $remainingTraffic);
-
-                    if (is_null($chat->traffic_limit_notified_at)) {
-                        $checkAlertTimeLimit = true;
-                    } else {
-                        $checkAlertTimeLimit = Carbon::parse($chat->traffic_limit_notified_at)->addMinutes(2)->isPast();
-                    }
 
                     if ($remainingTraffic <= $onGigaBytesInBytes and $remainingTraffic > 0 and $checkAlertTimeLimit) {
                         \Log::debug('your_traffic_limit_will_be_reached_soon');
