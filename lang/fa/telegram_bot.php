@@ -20,7 +20,7 @@ return [
     'do_you_want_to_check_previous_id' => 'آیا می‌خواهید شناسه قبلی خود را چک کنید؟',
     'check_again' => 'بررسی دوباره',
     'new_id' => 'شناسه جدید',
-    'your_account_will_be_expire_in_24_hours' => 'حساب کاربری شما تا ۲۴ ساعت دیگر به پایان می‌رسد. لطفا جهت تمدید با اکانت تلگرام :telegram_account تماس بگیرید.',
+    'your_account_will_be_expire_in_24_hours' => 'حساب کاربری شما تا :hours ساعت دیگر به پایان می‌رسد. لطفا جهت تمدید با اکانت تلگرام :telegram_account تماس بگیرید.',
     'your_traffic_limit_will_be_reached_soon' => 'ترافیک حساب شما به زودی به اتمام می‌رسد، لطفا جهت شارژ ترافیک با اکانت تلگرام :telegram_account تماس بگیرید.',
 
     'keyboard' => [

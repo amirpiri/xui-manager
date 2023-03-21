@@ -30,12 +30,15 @@ class TrafficLimitAlert
                     if (!empty($clientTraffic['expiry_time'])) {
                         $expiryTime = Carbon::createFromTimestamp($clientTraffic['expiry_time'] / 1000);
                         \Log::debug($expiryTime);
-                        if (!$expiryTime->isPast() and $expiryTime->diffInHours(Carbon::now()) <= 24 and $checkAlertTimeLimit) {
+                        if (!$expiryTime->isPast() and ($diff = $expiryTime->diffInHours(Carbon::now())) <= 24 and $checkAlertTimeLimit) {
                             \Log::debug('your_account_will_be_expire_in_24_hours');
                             $chat->message(
                                 __(
                                     'telegram_bot.your_account_will_be_expire_in_24_hours',
-                                    ['telegram_account' => config('telegraph.xui.support_telegram_account')]
+                                    [
+                                        'telegram_account' => config('telegraph.xui.support_telegram_account'),
+                                        'hours' => $diff,
+                                    ]
                                 )
                             )->send();
                             $chat->traffic_limit_notified_at = Carbon::now()->toDateTimeString();
