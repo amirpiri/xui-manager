@@ -3,6 +3,7 @@
 namespace App\Http\TelegramWebhooks;
 
 use App\Http\TelegramWebhooks\Enums\ChatStateEnum;
+use App\Http\TelegramWebhooks\Services\DnsService;
 use App\Models\Inbound;
 use Carbon\Carbon;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
@@ -13,12 +14,70 @@ use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
 use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Stringable;
 use Morilog\Jalali\Jalalian;
+use PHPUnit\Event\Runtime\PHP;
 
 class CustomWebhookHandler extends WebhookHandler
 {
     protected function handleChatMessage(Stringable $text): void
     {
-        if ($this->chat->state == ChatStateEnum::Account_UUID->value) {
+
+        if ($text->toString() === __('telegram_bot.keyboard.ip_list')) {
+            $this->chat->message(
+                'لیست آی پی چیست؟' . PHP_EOL .
+                'به دلیل فیلترینگ شدیدی که این روزها حاکم هست هر آی پی ممکن است روی اینترنت خاصی کار بکند. برای همین ما آی پی‌های هر اینترنت را جدا کردیم.' . PHP_EOL .
+                'البته شما می‌توانید آی پی‌های مختلف را روی هر اینترنتی تست کنید و از هر کدام که سرعت بهتری گرفتید همان را استفاده کنید.' . PHP_EOL .
+                'آی پی مورد نظر را باید در قسمت address کانفیگ وی پی ان خود وارد کنید و یا با زدن بر روی دریافت لینک ، لینک گانفیگ خود را دریافت کنید.'
+            )->send();
+
+            $dnsService = new DnsService(config('cloudflare.dns_zone_id'));
+            $dnsRecords = $dnsService->getZoneRecords();
+
+            if ($dnsRecords['success'] === true) {
+                $keyboardArray = [];
+                if (count($dnsRecords['result'] ?? []) > 0) {
+                    foreach ($dnsRecords['result'] as $dnsRecord) {
+                        if (!empty($dnsRecord['comment'])) {
+                            $keyboardArray[] = Button::make($dnsRecord['comment'])
+                                ->action('vpnAddress')
+                                ->param('url', $dnsRecord['name']);
+                        }
+                    }
+                }
+
+                if (count($keyboardArray) > 0) {
+                    $this->chat->message('Choose one:')
+                        ->keyboard(Keyboard::make()->buttons($keyboardArray)->chunk(4))
+                        ->send();
+                }
+            } else {
+                \Log::error(json_encode($dnsRecords));
+                $this->chat->message('Error');
+            }
+
+        } elseif ($text->toString() === __('telegram_bot.keyboard.account')) {
+
+            $this->chat->state = ChatStateEnum::Account_UUID;
+            $this->chat->save();
+
+            if (!empty($this->chat->client_uuid)) {
+                $this->chat->message(__('telegram_bot.you_already_have_an_account'))
+                    ->removeReplyKeyboard()
+                    ->send();
+
+                $this->chat->message(__('telegram_bot.do_you_want_to_check_previous_id'))
+                    ->keyboard(Keyboard::make()->buttons([
+                        Button::make(__('telegram_bot.yes'))->action('yesCheckPreviousAccount')->param('yesCheckPreviousAccount', true),
+                        Button::make(__('telegram_bot.no'))->action('newId')->param('newId', true),
+                    ])->chunk(2))
+                    ->send();
+            } else {
+                $this->pleaseEnterYourId();
+            }
+
+        } elseif ($text->toString() === __('telegram_bot.keyboard.contact_support')) {
+            $this->chat->message(__('telegram_bot.to_contact_support_tap_on_link_bellow'))->send();
+            $this->chat->message(config('telegraph.xui.support_telegram_account'))->send();
+        } elseif ($this->chat->state == ChatStateEnum::Account_UUID->value) {
 
             $inbound = null;
             $clientData = $this->findUserByClientUUID($text->toString(), $inbound);
@@ -53,6 +112,7 @@ class CustomWebhookHandler extends WebhookHandler
                 )->keyboard(Keyboard::make()->buttons([
                     Button::make(__('telegram_bot.check_again'))->action('checkAgain')->param('checkAgain', true),
                     Button::make(__('telegram_bot.new_id'))->action('newId')->param('newId', true),
+                    Button::make(__('telegram_bot.restart'))->action('start')->param('newId', true),
                 ])->chunk(2))->send();
 
                 $this->chat->client_uuid = $clientData['id'];
@@ -68,26 +128,6 @@ class CustomWebhookHandler extends WebhookHandler
 //                        ])->chunk(2))
 //                        ->send();
 //                }
-            }
-
-        } elseif ($text->toString() === __('telegram_bot.keyboard.account')) {
-
-            $this->chat->state = ChatStateEnum::Account_UUID;
-            $this->chat->save();
-
-            if (!empty($this->chat->client_uuid)) {
-                $this->chat->message(__('telegram_bot.you_already_have_an_account'))
-                    ->removeReplyKeyboard()
-                    ->send();
-
-                $this->chat->message(__('telegram_bot.do_you_want_to_check_previous_id'))
-                    ->keyboard(Keyboard::make()->buttons([
-                        Button::make(__('telegram_bot.yes'))->action('yesCheckPreviousAccount')->param('yesCheckPreviousAccount', true),
-                        Button::make(__('telegram_bot.no'))->action('newId')->param('newId', true),
-                    ])->chunk(2))
-                    ->send();
-            } else {
-                $this->pleaseEnterYourId();
             }
 
         } else {
@@ -116,7 +156,9 @@ class CustomWebhookHandler extends WebhookHandler
         $this->chat->message(__('telegram_bot.please_choose_one'))
             ->replyKeyboard(ReplyKeyboard::make()->buttons([
                 ReplyButton::make(__('telegram_bot.keyboard.account')),
-            ]))->send();
+                ReplyButton::make(__('telegram_bot.keyboard.ip_list')),
+                ReplyButton::make(__('telegram_bot.keyboard.contact_support')),
+            ])->chunk(2))->send();
     }
 
     protected function handleUnknownCommand(Stringable $text): void
@@ -187,6 +229,34 @@ class CustomWebhookHandler extends WebhookHandler
         $uuid = $this->chat->client_uuid;
         if (!empty($uuid)) {
             $this->handleChatMessage(new Stringable($uuid));
+        }
+    }
+
+    public function vpnAddress()
+    {
+        $url = $this->data->get('url');
+        $this->chat->markdownV2('```' . $url . '```')
+            ->keyboard(Keyboard::make()->buttons([
+                Button::make(__('telegram_bot.get_link'))->action('getConfigLink')->param('url', $url),
+            ])->chunk(2))->send();
+    }
+
+    public function getConfigLink()
+    {
+        $url = $this->data->get('url');
+        if (empty($this->chat->client_uuid)) {
+            $this->chat->message('آیدی شما ثبت نشده. برای ثبت آیدی دکمه حساب کاربری زیر را بزنید.')->send();
+        } else {
+            $this->chat->markdownV2(
+                '```' .
+                'vless://' .
+                $this->chat->client_uuid . '@' . $url . ':443?sni=' .
+                config('telegraph.xui.active_domain') .
+                '&security=tls&type=ws&path=/chat&host=' .
+                config('telegraph.xui.active_domain') .
+                '#AmirFalconAC' .
+                '```'
+            )->send();
         }
     }
 }
