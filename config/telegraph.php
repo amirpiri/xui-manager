@@ -122,5 +122,9 @@ return [
         'inbounds' => explode(',', env('XUI_INBOUNDS', '1')),
         'support_telegram_account' => env('XUI_SUPPORT_TELEGRAM_ACCOUNT'),
         'active_domain' => env('XUI_ACTIVE_DOMAIN'),
+        'android_tutorial_video_path' => env('XUI_ANDROID_TUTORIAL_VIDEO_PATH'),
+        'ios_tutorial_video_path' => env('XUI_IOS_TUTORIAL_VIDEO_PATH'),
+        'windows_tutorial_video_path' => env('XUI_WINDOWS_TUTORIAL_VIDEO_PATH'),
+        'mac_tutorial_video_path' => env('XUI_MAC_TUTORIAL_VIDEO_PATH'),
     ]
 ];

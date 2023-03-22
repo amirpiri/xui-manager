@@ -15,6 +15,7 @@ use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Stringable;
 use Morilog\Jalali\Jalalian;
 use PHPUnit\Event\Runtime\PHP;
+use Storage;
 
 class CustomWebhookHandler extends WebhookHandler
 {
@@ -45,7 +46,7 @@ class CustomWebhookHandler extends WebhookHandler
                 }
 
                 if (count($keyboardArray) > 0) {
-                    $this->chat->message('Choose one:')
+                    $this->chat->message(__('telegram_bot.please_choose_one'))
                         ->keyboard(Keyboard::make()->buttons($keyboardArray)->chunk(4))
                         ->send();
                 }
@@ -77,6 +78,36 @@ class CustomWebhookHandler extends WebhookHandler
         } elseif ($text->toString() === __('telegram_bot.keyboard.contact_support')) {
             $this->chat->message(__('telegram_bot.to_contact_support_tap_on_link_bellow'))->send();
             $this->chat->message(config('telegraph.xui.support_telegram_account'))->send();
+        } elseif ($text->toString() === __('telegram_bot.keyboard.tutorials')) {
+            $this->chat->message(__('telegram_bot.please_choose_one'))->replyKeyboard(ReplyKeyboard::make()->buttons([
+                ReplyButton::make(__('telegram_bot.keyboard.android_tutorial')),
+                ReplyButton::make(__('telegram_bot.keyboard.ios_tutorial')),
+                ReplyButton::make(__('telegram_bot.keyboard.windows_tutorial')),
+                ReplyButton::make(__('telegram_bot.keyboard.mac_tutorial')),
+                ReplyButton::make(__('telegram_bot.restart')),
+            ])->chunk(4))->send();
+        } elseif ($text->toString() === __('telegram_bot.keyboard.android_tutorial')) {
+            $this->chat
+                ->video(config('telegraph.xui.android_tutorial_video_path'))
+                ->message('آموزش نرم افزار v2rayng برای اندروید')
+                ->send();
+            $this->chat->message('لینک دانلود: https://play.google.com/store/apps/details?id=com.v2ray.ang')->send();
+        } elseif ($text->toString() === __('telegram_bot.keyboard.ios_tutorial')) {
+            $this->chat
+                ->video(config('telegraph.xui.ios_tutorial_video_path'))
+                ->message('آموزش نرم افزار napsternetv برای  IOS')
+                ->send();
+            $this->chat->message('لینک دانلود: https://apps.apple.com/us/app/napsternetv/id1629465476')->send();
+        }  elseif ($text->toString() === __('telegram_bot.keyboard.windows_tutorial')) {
+            $this->chat
+                ->video(config('telegraph.xui.windows_tutorial_video_path'))
+                ->message('آموزش نرم افزار nekoray برای ویندوز')
+                ->send();
+            $this->chat->message('لینک دانلود: https://github.com/MatsuriDayo/nekoray')->send();
+        }  elseif ($text->toString() === __('telegram_bot.keyboard.mac_tutorial')) {
+            $this->chat
+                ->video(config('telegraph.xui.mac_tutorial_video_path'))
+                ->send();
         } elseif ($this->chat->state == ChatStateEnum::Account_UUID->value) {
 
             $inbound = null;
@@ -157,6 +188,7 @@ class CustomWebhookHandler extends WebhookHandler
             ->replyKeyboard(ReplyKeyboard::make()->buttons([
                 ReplyButton::make(__('telegram_bot.keyboard.account')),
                 ReplyButton::make(__('telegram_bot.keyboard.ip_list')),
+                ReplyButton::make(__('telegram_bot.keyboard.tutorials')),
                 ReplyButton::make(__('telegram_bot.keyboard.contact_support')),
             ])->chunk(2))->send();
     }
