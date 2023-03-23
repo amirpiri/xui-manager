@@ -110,8 +110,19 @@ class CustomWebhookHandler extends WebhookHandler
                 ->send();
         } elseif ($this->chat->state == ChatStateEnum::Account_UUID->value) {
 
+            $extract_uuid_pattern = "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/";
+            $string_to_match = $text->toString();
+            preg_match_all($extract_uuid_pattern, $string_to_match, $matches);
+            $uuid = $matches[0] ?? [];
+            if (count($uuid) == 0) {
+                $this->chat->message(__('telegram_bot.wrong_id'))->send();
+                return;
+            } else {
+                $uuid = $uuid[0];
+            }
+
             $inbound = null;
-            $clientData = $this->findUserByClientUUID($text->toString(), $inbound);
+            $clientData = $this->findUserByClientUUID($uuid, $inbound);
 
             if (empty($clientData) and !empty($this->chat->client_uuid)) {
                 $clientData = $this->findUserByClientUUID($this->chat->client_uuid, $inbound);
