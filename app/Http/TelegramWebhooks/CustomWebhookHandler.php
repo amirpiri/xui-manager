@@ -53,7 +53,7 @@ class CustomWebhookHandler extends WebhookHandler
 
                 $this->chat->message(__('telegram_bot.get_subscription_link'))
                     ->keyboard(Keyboard::make()->buttons([
-                        Button::make(__('telegram_bot.get'))->url(route('generate-subscription-link', ['uuid' => $this->chat->client_uuid])),
+                        Button::make(__('telegram_bot.get'))->url(config('telegraph.xui.subscription_link_domain') . '/generate/subs/' . $this->chat->client_uuid ),
                         Button::make(__('telegram_bot.tutorial'))->action('subscriptionTutorial')->param('bool', true),
                     ])->chunk(4))
                     ->send();

@@ -126,5 +126,6 @@ return [
         'ios_tutorial_video_path' => env('XUI_IOS_TUTORIAL_VIDEO_PATH'),
         'windows_tutorial_video_path' => env('XUI_WINDOWS_TUTORIAL_VIDEO_PATH'),
         'mac_tutorial_video_path' => env('XUI_MAC_TUTORIAL_VIDEO_PATH'),
+        'subscription_link_domain' => env('XUI_SUBSCRIPTION_LINK_DOMAIN')
     ]
 ];
