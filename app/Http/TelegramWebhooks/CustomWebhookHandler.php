@@ -50,6 +50,13 @@ class CustomWebhookHandler extends WebhookHandler
                         ->keyboard(Keyboard::make()->buttons($keyboardArray)->chunk(4))
                         ->send();
                 }
+
+                $this->chat->message(__('telegram_bot.get_subscription_link'))
+                    ->keyboard(Keyboard::make()->buttons([
+                        Button::make(__('telegram_bot.get'))->url(route('generate-subscription-link', ['uuid' => $this->chat->client_uuid])),
+                        Button::make(__('telegram_bot.tutorial'))->action('subscriptionTutorial')->param('bool', true),
+                    ])->chunk(4))
+                    ->send();
             } else {
                 \Log::error(json_encode($dnsRecords));
                 $this->chat->message('Error');
@@ -292,14 +299,18 @@ class CustomWebhookHandler extends WebhookHandler
         } else {
             $this->chat->markdownV2(
                 '```' .
-                'vless://' .
-                $this->chat->client_uuid . '@' . $url . ':443?sni=' .
-                config('telegraph.xui.active_domain') .
-                '&security=tls&type=ws&path=/chat&host=' .
-                config('telegraph.xui.active_domain') .
-                '#AmirFalconAC' .
+                generateConfigLink($this->chat->client_uuid, $url) .
                 '```'
             )->send();
         }
+    }
+
+    public function subscriptionTutorial()
+    {
+        $this->chat->message('بزودی...')->send();
+//        $this->chat
+//            ->video(config('telegraph.xui.android_tutorial_video_path'))
+//            ->message('آموزش نرم افزار v2rayng برای اندروید')
+//            ->send();
     }
 }

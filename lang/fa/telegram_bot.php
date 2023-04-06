@@ -4,6 +4,9 @@ return [
     'welcome' => 'خوش آمدید',
     'please_enter_your_account_id' => 'لطفا شناسه اکانت خود را وارد کنید: ',
     'please_choose_one' => 'لطفا یکی از گزینه‌های زیر را انتخاب کنید:',
+    'get_subscription_link' => 'دریافت لینک subscription',
+    'get' => 'دریافت',
+    'tutorial' => 'آموزش',
     'i_cant_understand_your_command' => 'این دستور رو بلد نیستم انجام بدم:',
     'id_is_not_found' => 'شناسه پیدا نشد',
     'user_data' => 'حجم باقی مانده:   ' . ':remaining' . PHP_EOL .
