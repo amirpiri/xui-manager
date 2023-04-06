@@ -24,7 +24,9 @@ class SubscriptionController extends Controller
             $links = '';
             if (count($dnsRecords['result'] ?? []) > 0) {
                 foreach ($dnsRecords['result'] as $dnsRecord) {
-                    $links .= generateConfigLink($uuid[0], $dnsRecord['name'], $dnsRecord['comment']) . PHP_EOL;
+                    if (!empty($dnsRecord['comment'])) {
+                        $links .= generateConfigLink($uuid[0], $dnsRecord['name'], $dnsRecord['comment']) . PHP_EOL;
+                    }
                 }
             }
         }
