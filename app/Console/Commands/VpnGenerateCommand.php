@@ -35,7 +35,7 @@ class VpnGenerateCommand extends Command
 
             $client = ClientTraffic::where('email', $this->getClientEmail($inbound, $uuid))->firstOrFail();
             $class = 'App\\Services\\ConnectionGenerator\\' . ucfirst($inbound->protocol) . self::PREFIX;
-            (new $class(
+            return (new $class(
                 $this->argument('address'),
                 $uuid,
                 $client->email,
