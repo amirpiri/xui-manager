@@ -43,9 +43,8 @@ class TransferClientToCloudflareCommand extends Command
             ->first();
         $oldConfig = json_decode($cloudflareInbound->settings, true);
         $oldConfig['clients'][] = $configMustTransferred;
-        $cloudflareInbound->settings = json_encode($oldConfig);
         Inbound::where('id', config('traffic_client.cloudflare_inbound_id'))
-            ->update($cloudflareInbound->toArray());
+            ->update(['settings' => json_encode($oldConfig)]);
         ClientTraffic::where('email', $configMustTransferred['email'])
             ->update([
                 'inbound_id' => config('traffic_client.cloudflare_inbound_id'),
