@@ -31,14 +31,18 @@ class TransferClientToCloudflareCommand extends Command
         $inbound = Inbound::where('settings', 'like', "%$uuid%")->first();
         $configMustTransferred = [];
         $configs = json_decode($inbound->settings, true);
+        $newInboundConfig['disableInsecureEncryption'] = $configs['disableInsecureEncryption'];
+        $newInboundConfig = [];
         foreach ($configs['clients'] as $key => $client) {
             if ($client['id'] === $uuid) {
                 $configMustTransferred = $client;
                 unset($configs['clients'][$key]);
+            } else {
+                $newInboundConfig['clients'][] = $client;
             }
         }
-        $inbound->settings = $configs;
-        Inbound::where('id', $inbound->id)->update($inbound->toArray());
+
+        Inbound::where('id', $inbound->id)->update(['settings' => json_encode($newInboundConfig)]);
         $cloudflareInbound = Inbound::where('id', config('traffic_client.cloudflare_inbound_id'))
             ->first();
         $oldConfig = json_decode($cloudflareInbound->settings, true);
