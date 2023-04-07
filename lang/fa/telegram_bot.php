@@ -29,6 +29,8 @@ return [
     'get_link' => 'دریافت لینک',
     'restart' => 'شروع دوباره',
     'wrong_id' => 'شناسه وارد شده اشتباه است!',
+    'v2rayNG_android_subscription_tutorial' => 'آموزش استفاده از لینک subscription در V2rayNG Android',
+    'v2rayNG_android_subscription_delay_test_tutorial' => 'آموزش تست سالم بودن لینک‌های subscription در V2rayNG Android',
 
     'keyboard' => [
         'account' => '👤 حساب کاربری 👤',

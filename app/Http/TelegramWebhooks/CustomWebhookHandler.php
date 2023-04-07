@@ -307,10 +307,13 @@ class CustomWebhookHandler extends WebhookHandler
 
     public function subscriptionTutorial()
     {
-        $this->chat->message('بزودی...')->send();
-//        $this->chat
-//            ->video(config('telegraph.xui.android_tutorial_video_path'))
-//            ->message('آموزش نرم افزار v2rayng برای اندروید')
-//            ->send();
+        $this->chat
+            ->video(config('telegraph.xui.v2rayNG_subscription_tutorial_video_path'))
+            ->message(__('telegram_bot.v2rayNG_android_subscription_tutorial'))
+            ->send();
+        $this->chat
+            ->video(config('telegraph.xui.v2rayNG_subscription_delay_test_tutorial_video_path'))
+            ->message(__('telegram_bot.v2rayNG_android_subscription_delay_test_tutorial'))
+            ->send();
     }
 }
