@@ -46,12 +46,17 @@ class NewClientController extends Controller
                 'alterId' => 0,
                 'email' => $request->username,
                 'limitIp' => 0,
-                'totalGB' => 0,
+                'totalGB' => $request->total * config('traffic_client.convert_to_gb'),
                 'expiryTime' => $expireTime
             ];
             $inboundSettings = json_decode($inboundRow->settings, true);
+            $clients = [];
+            foreach ($inboundSettings['clients'] as $client) {
+                $clients[] = $client;
+            }
+            $clients[] = $userSetting;
             $settings = [
-                'clients' => array_merge($inboundSettings['clients'], $userSetting),
+                'clients' => $clients,
                 'disableInsecureEncryption' => $inboundSettings['disableInsecureEncryption']
             ];
             $inboundRow->settings = $settings;
