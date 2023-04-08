@@ -20,14 +20,19 @@ class RenewClientController extends Controller
 {
     public function show(int $clientId, ClientTrafficShowRequest $request)
     {
-        $userClientTraffic = UserClientTraffic::where('client_traffic_id', $clientId);
+
         if (auth()->user()->role === UserRoleEnum::RESELLER->value) {
-            $userClientTraffic = $userClientTraffic->where('user_id', auth()->user()->id);
+            $userClientTraffic = UserClientTraffic::where('client_traffic_id', $clientId)
+                ->where('user_id', auth()->user()->id);
+        } elseif (auth()->user()->role === UserRoleEnum::ADMIN->value) {
+            $userClientTraffic = ClientTraffic::where('id', $clientId);
         }
         $userClientTraffic = $userClientTraffic->first();
+
         if (is_null($userClientTraffic)) {
             return abort('403');
         }
+
         $clientRow = ClientTraffic::find($clientId);
         return view('clients.renew', ['client' => $clientRow]);
     }
