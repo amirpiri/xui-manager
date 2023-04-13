@@ -129,5 +129,6 @@ return [
         'subscription_link_domain' => env('XUI_SUBSCRIPTION_LINK_DOMAIN'),
         'v2rayNG_subscription_tutorial_video_path' => env('XUI_V2RAYNG_SUBSCRIPTION__TUTORIAL_VIDEO_PATH'),
         'v2rayNG_subscription_delay_test_tutorial_video_path' => env('XUI_V2RAYNG_SUBSCRIPTION_DELAY_TEST_TUTORIAL_VIDEO_PATH'),
+        'napsternetv_subscription_tutorial_video_path' => env('XUI_NAPSTERNETV_SUBSCRIPTION__TUTORIAL_VIDEO_PATH'),
     ]
 ];

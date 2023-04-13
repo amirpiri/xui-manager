@@ -321,6 +321,10 @@ class CustomWebhookHandler extends WebhookHandler
             config('telegraph.xui.v2rayNG_subscription_delay_test_tutorial_video_path'),
             __('telegram_bot.v2rayNG_android_subscription_delay_test_tutorial')
         );
+        $this->sendVideo(
+            config('telegraph.xui.napsternetv_subscription_tutorial_video_path'),
+            'آموزش نرم افزار napsternetv برای ios:'
+        );
     }
 
     private function sendVideo(string $configName, string $message)
@@ -344,8 +348,16 @@ class CustomWebhookHandler extends WebhookHandler
 
     public function sendSubscriptionLink()
     {
+        $this->chat->message('برای اندروید:')->send();
+
         $this->chat->message(
             config('telegraph.xui.subscription_link_domain') . '/generate/subs/' . $this->chat->client_uuid
+        )->send();
+
+        $this->chat->message('برای ios:')->send();
+
+        $this->chat->message(
+            config('telegraph.xui.subscription_link_domain') . '/generate/subs/' . $this->chat->client_uuid . '/base64'
         )->send();
     }
 }
