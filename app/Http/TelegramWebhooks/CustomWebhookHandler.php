@@ -301,26 +301,13 @@ class CustomWebhookHandler extends WebhookHandler
         if (empty($this->chat->client_uuid)) {
             $this->chat->message('آیدی شما ثبت نشده. برای ثبت آیدی دکمه حساب کاربری زیر را بزنید.')->send();
         } else {
-
-            if (config('traffic_client.generate_site') === GenerateSiteEnum::OTHER->value) {
-                $this->chat->markdownV2(
-                    '```' .
-                    generateConfigLink($this->chat->client_uuid, $url) .
-                    '```'
-                )->send();
-            } else {
-                if ($inboundRow->id === (int)config('traffic_client.cloudflare_inbound_id')) {
-                    $connection = (new GenerateConnection($this->chat->client_uuid,$url))->execute();
-                    $this->chat->markdownV2(
-                        '```' .
-                        $connection
-                        .
-                        '```'
-                    )->send();
-                } else {
-                    $this->chat->message('در حال حاضر برای نام کاربری شما این امکان فراهم نمی باشد. لطفا از پشتیبان خود درخواست انتقال به سرویس جدید را دهید.')->send();
-                }
-            }
+            $connection = (new GenerateConnection($this->chat->client_uuid,$url))->execute();
+            $this->chat->markdownV2(
+                '```' .
+                $connection
+                .
+                '```'
+            )->send();
         }
     }
 
