@@ -2,26 +2,24 @@
 
 namespace App\Http\TelegramWebhooks;
 
+use App\Enums\GenerateSiteEnum;
 use App\Http\TelegramWebhooks\Enums\ChatStateEnum;
 use App\Http\TelegramWebhooks\Services\DnsService;
 use App\Models\Inbound;
+use App\Services\GenerateConnection;
 use Carbon\Carbon;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use DefStudio\Telegraph\Keyboard\Button;
 use DefStudio\Telegraph\Keyboard\Keyboard;
 use DefStudio\Telegraph\Keyboard\ReplyButton;
 use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
-use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Stringable;
 use Morilog\Jalali\Jalalian;
-use PHPUnit\Event\Runtime\PHP;
-use Storage;
 
 class CustomWebhookHandler extends WebhookHandler
 {
     protected function handleChatMessage(Stringable $text): void
     {
-
         if ($text->toString() === __('telegram_bot.keyboard.ip_list')) {
             $this->chat->message(
                 'لیست آی پی چیست؟' . PHP_EOL .
@@ -287,19 +285,36 @@ class CustomWebhookHandler extends WebhookHandler
     public function getConfigLink()
     {
         $url = $this->data->get('url');
+        $inboundRow = Inbound::where('settings', 'like', '%'. $this->chat->client_uuid.'%')
+            ->first();
+
         if (empty($this->chat->client_uuid)) {
             $this->chat->message('آیدی شما ثبت نشده. برای ثبت آیدی دکمه حساب کاربری زیر را بزنید.')->send();
         } else {
-            $this->chat->markdownV2(
-                '```' .
-                'vless://' .
-                $this->chat->client_uuid . '@' . $url . ':443?sni=' .
-                config('telegraph.xui.active_domain') .
-                '&security=tls&type=ws&path=/chat&host=' .
-                config('telegraph.xui.active_domain') .
-                '#AmirFalconAC' .
-                '```'
-            )->send();
+            if (config('traffic_client.generate_site') === GenerateSiteEnum::OTHER->value) {
+                $this->chat->markdownV2(
+                    '```' .
+                    'vless://' .
+                    $this->chat->client_uuid . '@' . $url . ':443?sni=' .
+                    config('telegraph.xui.active_domain') .
+                    '&security=tls&type=ws&path=/chat&host=' .
+                    config('telegraph.xui.active_domain') .
+                    '#AmirFalconAC' .
+                    '```'
+                )->send();
+            } else {
+                if ($inboundRow->id === (int)config('traffic_client.cloudflare_inbound_id')) {
+                    $connection = (new GenerateConnection($this->chat->client_uuid,$url))->execute();
+                    $this->chat->markdownV2(
+                        '```' .
+                        $connection
+                        .
+                        '```'
+                    )->send();
+                } else {
+                    $this->chat->message('در حال حاضر برای نام کاربری شما این امکان فراهم نمی باشد. لطفا از پشتیبان خود درخواست انتقال به سرویس جدید را دهید.')->send();
+                }
+            }
         }
     }
 }

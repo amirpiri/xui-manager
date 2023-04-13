@@ -33,7 +33,10 @@ class ClientListController extends Controller
 
         $result = $result->whereNotNull('client_traffics.email')
             ->where('client_traffics.email', '<>', '')
-            ->where('client_traffics.total', '<>', 0)->paginate(20);
+            ->where('client_traffics.total', '<>', 0)
+            ->orderBy('client_traffics.enable')
+            ->orderBy('expire_date')
+            ->paginate(20);
 
 
         return view('clients.index', ['clients' => $result]);

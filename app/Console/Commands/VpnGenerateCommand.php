@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ClientTraffic;
 use App\Models\Inbound;
+use App\Services\GenerateConnection;
 use Illuminate\Console\Command;
 
 class VpnGenerateCommand extends Command
@@ -28,19 +28,11 @@ class VpnGenerateCommand extends Command
      */
     public function handle()
     {
-        $uuid = $this->argument('uuid');
-        try {
-            $inbound = Inbound::where('settings', 'like', "%{$uuid}%")
-                ->firstOrFail();
 
-            $client = ClientTraffic::where('email', $this->getClientEmail($inbound, $uuid))->firstOrFail();
-            $class = 'App\\Services\\ConnectionGenerator\\' . ucfirst($inbound->protocol) . self::PREFIX;
-            $this->info( (new $class(
-                $this->argument('address'),
-                $uuid,
-                $client->email,
-                $inbound
-            ))->generate());
+        try {
+            $this->info(
+                (new GenerateConnection($this->argument('uuid'), $this->argument('address')))->execute()
+            );
         } catch (\Exception $exception) {
             $this->error($exception->getMessage());
         }
