@@ -6,24 +6,6 @@ use App\Models\Inbound;
 
 class VlessConnectionGenerator extends AbstractConnectionGenerator
 {
-    protected array $template = [
-        'add' => 'cloudflare',
-        'aid' => '0',
-        'alpn' => '',
-        'fp' => '',
-        'host' => 'sni',
-        'id' => 'uuid',
-        'net' => 'ws',
-        'path' => '/path',
-        'port' => '443',
-        'ps' => 'email',
-        'scy' => 'auto',
-        'sni' => 'sni',
-        'tls' => 'tls',
-        'type' => '',
-        'v' => '2',
-    ];
-
     public function __construct(
         protected string  $address,
         protected string  $id,
