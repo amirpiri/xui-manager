@@ -32,4 +32,9 @@ class SubscriptionController extends Controller
         }
         return $links;
     }
+
+    public function generateSubscriptionLinkBase64(string $uuid)
+    {
+        return base64_encode($this->generateSubscriptionLink($uuid));
+    }
 }

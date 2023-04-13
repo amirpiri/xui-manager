@@ -24,6 +24,7 @@ Route::get('/', function () {
 });
 
 Route::controller(SubscriptionController::class)->group(function () {
+    Route::get('generate/subs/{uuid}/base64', 'generateSubscriptionLinkBase64')->name('generate-subscription-link');
     Route::get('generate/subs/{uuid}', 'generateSubscriptionLink')->name('generate-subscription-link');
 });
 

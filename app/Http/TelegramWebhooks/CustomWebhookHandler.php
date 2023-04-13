@@ -53,7 +53,7 @@ class CustomWebhookHandler extends WebhookHandler
 
                 $this->chat->message(__('telegram_bot.get_subscription_link'))
                     ->keyboard(Keyboard::make()->buttons([
-                        Button::make(__('telegram_bot.get'))->url(config('telegraph.xui.subscription_link_domain') . '/generate/subs/' . $this->chat->client_uuid ),
+                        Button::make(__('telegram_bot.get'))->action('sendSubscriptionLink'),
                         Button::make(__('telegram_bot.tutorial'))->action('subscriptionTutorial')->param('bool', true),
                     ])->chunk(4))
                     ->send();
@@ -340,5 +340,12 @@ class CustomWebhookHandler extends WebhookHandler
                 cache()->put($configName, $response->json('result.video.file_id'), 48 * 60 * 60);
             }
         }
+    }
+
+    public function sendSubscriptionLink()
+    {
+        $this->chat->message(
+            config('telegraph.xui.subscription_link_domain') . '/generate/subs/' . $this->chat->client_uuid
+        )->send();
     }
 }
