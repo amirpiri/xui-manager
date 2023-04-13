@@ -5,6 +5,7 @@ use App\Http\Controllers\Client\InboundController;
 use App\Http\Controllers\Client\NewClientController;
 use App\Http\Controllers\Client\RenewClientController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,6 +21,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::controller(SubscriptionController::class)->group(function () {
+    Route::get('generate/subs/{uuid}', 'generateSubscriptionLink')->name('generate-subscription-link');
 });
 
 Route::get('/dashboard', function () {

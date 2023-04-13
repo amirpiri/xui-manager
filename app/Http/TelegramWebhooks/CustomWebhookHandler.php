@@ -13,6 +13,8 @@ use DefStudio\Telegraph\Keyboard\Button;
 use DefStudio\Telegraph\Keyboard\Keyboard;
 use DefStudio\Telegraph\Keyboard\ReplyButton;
 use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
+use DefStudio\Telegraph\Models\TelegraphChat;
+use Illuminate\Http\Response;
 use Illuminate\Support\Stringable;
 use Morilog\Jalali\Jalalian;
 
@@ -48,6 +50,13 @@ class CustomWebhookHandler extends WebhookHandler
                         ->keyboard(Keyboard::make()->buttons($keyboardArray)->chunk(4))
                         ->send();
                 }
+
+                $this->chat->message(__('telegram_bot.get_subscription_link'))
+                    ->keyboard(Keyboard::make()->buttons([
+                        Button::make(__('telegram_bot.get'))->url(config('telegraph.xui.subscription_link_domain') . '/generate/subs/' . $this->chat->client_uuid ),
+                        Button::make(__('telegram_bot.tutorial'))->action('subscriptionTutorial')->param('bool', true),
+                    ])->chunk(4))
+                    ->send();
             } else {
                 \Log::error(json_encode($dnsRecords));
                 $this->chat->message('Error');
@@ -85,27 +94,28 @@ class CustomWebhookHandler extends WebhookHandler
                 ReplyButton::make(__('telegram_bot.restart')),
             ])->chunk(4))->send();
         } elseif ($text->toString() === __('telegram_bot.keyboard.android_tutorial')) {
-            $this->chat
-                ->video(config('telegraph.xui.android_tutorial_video_path'))
-                ->message('آموزش نرم افزار v2rayng برای اندروید')
-                ->send();
+            $this->sendVideo(
+                config('telegraph.xui.android_tutorial_video_path'),
+                'آموزش نرم افزار v2rayng برای اندروید'
+            );
             $this->chat->message('لینک دانلود: https://play.google.com/store/apps/details?id=com.v2ray.ang')->send();
         } elseif ($text->toString() === __('telegram_bot.keyboard.ios_tutorial')) {
-            $this->chat
-                ->video(config('telegraph.xui.ios_tutorial_video_path'))
-                ->message('آموزش نرم افزار napsternetv برای  IOS')
-                ->send();
+            $this->sendVideo(
+                config('telegraph.xui.ios_tutorial_video_path'),
+                'آموزش نرم افزار napsternetv برای  IOS'
+            );
             $this->chat->message('لینک دانلود: https://apps.apple.com/us/app/napsternetv/id1629465476')->send();
         }  elseif ($text->toString() === __('telegram_bot.keyboard.windows_tutorial')) {
-            $this->chat
-                ->video(config('telegraph.xui.windows_tutorial_video_path'))
-                ->message('آموزش نرم افزار nekoray برای ویندوز')
-                ->send();
+            $this->sendVideo(
+                config('telegraph.xui.windows_tutorial_video_path'),
+                'آموزش نرم افزار nekoray برای ویندوز'
+            );
             $this->chat->message('لینک دانلود: https://github.com/MatsuriDayo/nekoray')->send();
         }  elseif ($text->toString() === __('telegram_bot.keyboard.mac_tutorial')) {
-            $this->chat
-                ->video(config('telegraph.xui.mac_tutorial_video_path'))
-                ->send();
+            $this->sendVideo(
+                config('telegraph.xui.mac_tutorial_video_path'),
+                ''
+            );
         } elseif ($this->chat->state == ChatStateEnum::Account_UUID->value) {
 
             $extract_uuid_pattern = "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/";
@@ -291,15 +301,11 @@ class CustomWebhookHandler extends WebhookHandler
         if (empty($this->chat->client_uuid)) {
             $this->chat->message('آیدی شما ثبت نشده. برای ثبت آیدی دکمه حساب کاربری زیر را بزنید.')->send();
         } else {
+
             if (config('traffic_client.generate_site') === GenerateSiteEnum::OTHER->value) {
                 $this->chat->markdownV2(
                     '```' .
-                    'vless://' .
-                    $this->chat->client_uuid . '@' . $url . ':443?sni=' .
-                    config('telegraph.xui.active_domain') .
-                    '&security=tls&type=ws&path=/chat&host=' .
-                    config('telegraph.xui.active_domain') .
-                    '#AmirFalconAC' .
+                    generateConfigLink($this->chat->client_uuid, $url) .
                     '```'
                 )->send();
             } else {
@@ -314,6 +320,37 @@ class CustomWebhookHandler extends WebhookHandler
                 } else {
                     $this->chat->message('در حال حاضر برای نام کاربری شما این امکان فراهم نمی باشد. لطفا از پشتیبان خود درخواست انتقال به سرویس جدید را دهید.')->send();
                 }
+            }
+        }
+    }
+
+    public function subscriptionTutorial()
+    {
+        $this->sendVideo(
+            config('telegraph.xui.v2rayNG_subscription_tutorial_video_path'),
+            __('telegram_bot.v2rayNG_android_subscription_tutorial')
+        );
+        $this->sendVideo(
+            config('telegraph.xui.v2rayNG_subscription_delay_test_tutorial_video_path'),
+            __('telegram_bot.v2rayNG_android_subscription_delay_test_tutorial')
+        );
+    }
+
+    private function sendVideo(string $configName, string $message)
+    {
+        if (!empty($configName)) {
+            $name = cache()->get($configName);
+            if (is_null($name)) {
+                $name = $configName;
+            }
+
+            $response = $this->chat
+                ->video($name)
+                ->message($message)
+                ->send();
+
+            if (!cache()->has($configName)) {
+                cache()->put($configName, $response->json('result.video.file_id'), 48 * 60 * 60);
             }
         }
     }
