@@ -8,6 +8,7 @@ use App\Http\TelegramWebhooks\Services\DnsService;
 use App\Models\Inbound;
 use App\Services\GenerateConnection;
 use Carbon\Carbon;
+use DefStudio\Telegraph\Enums\ChatActions;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use DefStudio\Telegraph\Keyboard\Button;
 use DefStudio\Telegraph\Keyboard\Keyboard;
@@ -17,12 +18,14 @@ use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Http\Response;
 use Illuminate\Support\Stringable;
 use Morilog\Jalali\Jalalian;
+use Telegraph;
 
 class CustomWebhookHandler extends WebhookHandler
 {
     protected function handleChatMessage(Stringable $text): void
     {
         if ($text->toString() === __('telegram_bot.keyboard.ip_list')) {
+            Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->message(
                 'لیست آی پی چیست؟' . PHP_EOL .
                 'به دلیل فیلترینگ شدیدی که این روزها حاکم هست هر آی پی ممکن است روی اینترنت خاصی کار بکند. برای همین ما آی پی‌های هر اینترنت را جدا کردیم.' . PHP_EOL .
@@ -46,11 +49,13 @@ class CustomWebhookHandler extends WebhookHandler
                 }
 
                 if (count($keyboardArray) > 0) {
+                    Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
                     $this->chat->message(__('telegram_bot.please_choose_one'))
                         ->keyboard(Keyboard::make()->buttons($keyboardArray)->chunk(4))
                         ->send();
                 }
 
+                Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
                 $this->chat->message(__('telegram_bot.get_subscription_link'))
                     ->keyboard(Keyboard::make()->buttons([
                         Button::make(__('telegram_bot.get'))->action('sendSubscriptionLink'),
@@ -68,10 +73,12 @@ class CustomWebhookHandler extends WebhookHandler
             $this->chat->save();
 
             if (!empty($this->chat->client_uuid)) {
+                Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
                 $this->chat->message(__('telegram_bot.you_already_have_an_account'))
                     ->removeReplyKeyboard()
                     ->send();
 
+                Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
                 $this->chat->message(__('telegram_bot.do_you_want_to_check_previous_id'))
                     ->keyboard(Keyboard::make()->buttons([
                         Button::make(__('telegram_bot.yes'))->action('yesCheckPreviousAccount')->param('yesCheckPreviousAccount', true),
@@ -83,9 +90,12 @@ class CustomWebhookHandler extends WebhookHandler
             }
 
         } elseif ($text->toString() === __('telegram_bot.keyboard.contact_support')) {
+            Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->message(__('telegram_bot.to_contact_support_tap_on_link_bellow'))->send();
+            Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->message(config('telegraph.xui.support_telegram_account'))->send();
         } elseif ($text->toString() === __('telegram_bot.keyboard.tutorials')) {
+            Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->message(__('telegram_bot.please_choose_one'))->replyKeyboard(ReplyKeyboard::make()->buttons([
                 ReplyButton::make(__('telegram_bot.keyboard.android_tutorial')),
                 ReplyButton::make(__('telegram_bot.keyboard.ios_tutorial')),
@@ -98,18 +108,21 @@ class CustomWebhookHandler extends WebhookHandler
                 config('telegraph.xui.android_tutorial_video_path'),
                 'آموزش نرم افزار v2rayng برای اندروید'
             );
+            Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->message('لینک دانلود: https://play.google.com/store/apps/details?id=com.v2ray.ang')->send();
         } elseif ($text->toString() === __('telegram_bot.keyboard.ios_tutorial')) {
             $this->sendVideo(
                 config('telegraph.xui.ios_tutorial_video_path'),
                 'آموزش نرم افزار napsternetv برای  IOS'
             );
+            Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->message('لینک دانلود: https://apps.apple.com/us/app/napsternetv/id1629465476')->send();
         }  elseif ($text->toString() === __('telegram_bot.keyboard.windows_tutorial')) {
             $this->sendVideo(
                 config('telegraph.xui.windows_tutorial_video_path'),
                 'آموزش نرم افزار nekoray برای ویندوز'
             );
+            Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->message('لینک دانلود: https://github.com/MatsuriDayo/nekoray')->send();
         }  elseif ($text->toString() === __('telegram_bot.keyboard.mac_tutorial')) {
             $this->sendVideo(
@@ -123,6 +136,7 @@ class CustomWebhookHandler extends WebhookHandler
             preg_match_all($extract_uuid_pattern, $string_to_match, $matches);
             $uuid = $matches[0] ?? [];
             if (count($uuid) == 0) {
+                Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
                 $this->chat->message(__('telegram_bot.wrong_id'))->send();
                 return;
             } else {
@@ -137,7 +151,9 @@ class CustomWebhookHandler extends WebhookHandler
             }
 
             if (!isset($clientData) or empty($clientData)) {
+                Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
                 $this->chat->message(__('telegram_bot.id_is_not_found'))->send();
+                Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
                 $this->chat->message(__('telegram_bot.to_restart_tap_on_start_command'))->send();
             } else {
                 $clientTraffic = $inbound->clientTraffics()
@@ -150,6 +166,7 @@ class CustomWebhookHandler extends WebhookHandler
                     $expiryTime = Jalalian::fromCarbon($expiryTime)->format('%A, %d %B %Y');
                 }
 
+                Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
                 $this->chat->message(
                     __(
                         'telegram_bot.user_data',
@@ -169,15 +186,6 @@ class CustomWebhookHandler extends WebhookHandler
                 $this->chat->inbound_id = $inbound->id;
                 $this->chat->email = $clientData['email'];
                 $this->chat->save();
-
-//                if (!$this->chat->active_alert) {
-//                    $this->chat->message(__('telegram_bot.do_you_want_to_activate_account_alert'))
-//                        ->keyboard(Keyboard::make()->buttons([
-//                            Button::make(__('telegram_bot.yes'))->action('yes')->param('alert', true),
-//                            Button::make(__('telegram_bot.no'))->action('no')->param('alert', false),
-//                        ])->chunk(2))
-//                        ->send();
-//                }
             }
 
         } else {
@@ -188,11 +196,15 @@ class CustomWebhookHandler extends WebhookHandler
 
     private function pleaseEnterYourId()
     {
+        Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
         $this->chat->message(__('telegram_bot.learn_how_to_find_id_from_images_below'))
             ->removeReplyKeyboard()
             ->send();
+        Telegraph::chat($this->chat)->chatAction(ChatActions::UPLOAD_PHOTO)->send();
         $this->chat->photo(base_path('public/images/1.jpg'))->send();
+        Telegraph::chat($this->chat)->chatAction(ChatActions::UPLOAD_PHOTO)->send();
         $this->chat->photo(base_path('public/images/2.jpg'))->send();
+        Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
         $this->chat->message(__('telegram_bot.please_enter_your_account_id'))
             ->send();
     }
@@ -203,6 +215,7 @@ class CustomWebhookHandler extends WebhookHandler
             ->send();
         $this->chat->state = ChatStateEnum::Start;
         $this->chat->save();
+        Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
         $this->chat->message(__('telegram_bot.please_choose_one'))
             ->replyKeyboard(ReplyKeyboard::make()->buttons([
                 ReplyButton::make(__('telegram_bot.keyboard.account')),
@@ -214,6 +227,7 @@ class CustomWebhookHandler extends WebhookHandler
 
     protected function handleUnknownCommand(Stringable $text): void
     {
+        Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
         $this->chat->message(__('telegram_bot.i_cant_understand_your_command') . ' ' . $text)->send();
     }
 
@@ -227,6 +241,7 @@ class CustomWebhookHandler extends WebhookHandler
         }
         $this->reply("Done");
         $this->deleteKeyboard();
+        Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
         $this->chat->message(__('telegram_bot.alert_is_activated_successfully'))->send();
     }
 
@@ -240,6 +255,7 @@ class CustomWebhookHandler extends WebhookHandler
         }
         $this->reply("Done");
         $this->deleteKeyboard();
+        Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
         $this->chat->message(__('telegram_bot.alert_is_deactivated_successfully'))->send();
     }
 
@@ -286,6 +302,7 @@ class CustomWebhookHandler extends WebhookHandler
     public function vpnAddress()
     {
         $url = $this->data->get('url');
+        Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
         $this->chat->markdownV2('```' . $url . '```')
             ->keyboard(Keyboard::make()->buttons([
                 Button::make(__('telegram_bot.get_link'))->action('getConfigLink')->param('url', $url),
@@ -299,9 +316,11 @@ class CustomWebhookHandler extends WebhookHandler
             ->first();
 
         if (empty($this->chat->client_uuid)) {
+            Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->message('آیدی شما ثبت نشده. برای ثبت آیدی دکمه حساب کاربری زیر را بزنید.')->send();
         } else {
             $connection = (new GenerateConnection($this->chat->client_uuid,$url))->execute();
+            Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->markdownV2(
                 '```' .
                 $connection
@@ -334,6 +353,8 @@ class CustomWebhookHandler extends WebhookHandler
             if (is_null($name)) {
                 $name = $configName;
             }
+
+            Telegraph::chat($this->chat)->chatAction(ChatActions::UPLOAD_VIDEO)->send();
 
             $response = $this->chat
                 ->video($name)
