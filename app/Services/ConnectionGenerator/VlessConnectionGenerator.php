@@ -20,7 +20,7 @@ class VlessConnectionGenerator extends AbstractConnectionGenerator
      */
     public function generate(): string
     {
-        return 'vless://' . $this->id . '@' . $this->inbound->address . ':443?sni=' .
+        return 'vless://' . $this->id . '@' . $this->address . ':443?sni=' .
         config('telegraph.xui.active_domain') .
         '&security=tls&type=ws&path=/chat&host=' .
         config('telegraph.xui.active_domain') .
