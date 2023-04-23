@@ -15,15 +15,7 @@ class ClientListController extends Controller
 {
     public function __invoke()
     {
-        $page = request('page', 1);
-        $role = auth()->user()->role;
-        $cacheKey = CacheKeyEnum::CLIENT_TRAFFIC_PAGE_->value . "{$role}_{$page}";
-        if (Cache::has($cacheKey)) {
-            $result = Cache::get($cacheKey);
-        } else {
-            $result = $this->getClientTraffic();
-            Cache::put($cacheKey, $result, CacheKeyEnum::CLIENT_TRAFFIC_PAGE_->duration());
-        }
+        $result = $this->getClientTraffic();
         return view('clients.index', ['clients' => $result]);
     }
 
