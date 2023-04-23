@@ -11,7 +11,6 @@ class GenerateConnection
 
     public function __construct(
         private string $uuid,
-        private string $address
     )
     {
     }
@@ -28,7 +27,6 @@ class GenerateConnection
         $client = ClientTraffic::where('email', $this->getClientEmail($inbound, $this->uuid))->firstOrFail();
         $class = 'App\\Services\\ConnectionGenerator\\' . ucfirst($inbound->protocol) . self::PREFIX;
         return (new $class(
-            $this->address,
             $this->uuid,
             $client->email,
             $inbound

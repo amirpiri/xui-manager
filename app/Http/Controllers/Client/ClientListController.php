@@ -2,15 +2,35 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Enums\CacheKeyEnum;
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Inbound;
 use App\Models\UserClientTraffic;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ClientListController extends Controller
 {
     public function __invoke()
+    {
+        $page = request('page', 1);
+        $role = auth()->user()->role;
+        $cacheKey = CacheKeyEnum::CLIENT_TRAFFIC_PAGE_->value . "{$role}_{$page}";
+        if (Cache::has($cacheKey)) {
+            $result = Cache::get($cacheKey);
+        } else {
+            $result = $this->getClientTraffic();
+            Cache::put($cacheKey, $result, CacheKeyEnum::CLIENT_TRAFFIC_PAGE_->duration());
+        }
+        return view('clients.index', ['clients' => $result]);
+    }
+
+    /**
+     * @return LengthAwarePaginator
+     */
+    protected function getClientTraffic(): LengthAwarePaginator
     {
         $result = Inbound::select([
             DB::raw('(client_traffics.total - (client_traffics.down + client_traffics.up)) as remaining'),
@@ -28,17 +48,14 @@ class ClientListController extends Controller
             $userId = UserClientTraffic::select(['client_traffic_id'])
                 ->where('user_id', auth()->user()->id)
                 ->get()->toArray();
-         $result =    $result->whereIn('client_traffics.id', $userId);
+            $result = $result->whereIn('client_traffics.id', $userId);
         }
 
-        $result = $result->whereNotNull('client_traffics.email')
+        return $result->whereNotNull('client_traffics.email')
             ->where('client_traffics.email', '<>', '')
             ->where('client_traffics.total', '<>', 0)
             ->orderBy('client_traffics.enable')
             ->orderBy('expire_date')
             ->paginate(20);
-
-
-        return view('clients.index', ['clients' => $result]);
     }
 }

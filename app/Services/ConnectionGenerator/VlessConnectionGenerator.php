@@ -25,7 +25,6 @@ class VlessConnectionGenerator extends AbstractConnectionGenerator
     ];
 
     public function __construct(
-        protected string  $address,
         protected string  $id,
         protected string  $email,
         protected Inbound $inbound
