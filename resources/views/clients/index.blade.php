@@ -34,8 +34,12 @@
                 <td>{{\Carbon\Carbon::createFromTimestamp(($client->expire_date / 1000))->toDateTimeString()}} </td>
                 <td>{{\Carbon\Carbon::createFromTimestamp(($client->expire_date / 1000))->diffForHumans()}} </td>
                 <td>
-                    <a href="{{route('client.renew',['clientId' => $client->id])}}">
+                    <a href="{{route('client.renew',['clientId' => $client->id])}}" title="{{__('xui.renew')}}">
                         <i class="fa-sharp fa-solid fa-rotate"></i>
+                    </a>
+                    <a href="{{route('client.get-client-connection',['clientId' => $client->id])}}"
+                       title="{{__('xui.generate')}}">
+                        <i class="fa-sharp fa-solid fa-download"></i>
                     </a>
                 </td>
             </tr>

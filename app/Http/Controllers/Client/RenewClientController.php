@@ -12,12 +12,17 @@ use App\Models\ClientTraffic;
 use App\Models\Inbound;
 use App\Models\Renew;
 use App\Models\UserClientTraffic;
+use App\Services\Contracts\XuiEnglishRequestServiceInterface;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class RenewClientController extends Controller
 {
+
+    public function __construct(protected XuiEnglishRequestServiceInterface $xuiRequestService)
+    {
+    }
+
     public function show(int $clientId, ClientTrafficShowRequest $request)
     {
 
@@ -52,9 +57,9 @@ class RenewClientController extends Controller
             }
         }
         $settings = ['clients' => $inboundClients, 'disableInsecureEncryption' => false];
-        $inboundRow->settings = json_encode($settings);
+        $inboundRow->enable = (bool)$inboundRow->enable;
+        $inboundRow->settings = json_encode($settings, JSON_PRETTY_PRINT);
         DB::transaction(function () use ($clientRow, $inboundRow, $clientId, $total, $expireTime, $request) {
-            Inbound::find($clientRow->inbound_id)->update($inboundRow->toArray());
             ClientTraffic::where('id', $clientId)->update([
                 'total' => $total,
                 'down' => 0,
@@ -73,6 +78,9 @@ class RenewClientController extends Controller
             ]);
 
         });
-        return view('dashboard');
+
+        $this->xuiRequestService->updateInbound($clientRow->inbound_id, $inboundRow->toArray());
+
+        return redirect(route('dashboard'));
     }
 }

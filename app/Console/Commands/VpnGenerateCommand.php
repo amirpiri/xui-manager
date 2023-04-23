@@ -14,7 +14,7 @@ class VpnGenerateCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'vpn:generate {uuid} {address}';
+    protected $signature = 'vpn:generate {uuid}';
 
     /**
      * The console command description.
@@ -31,7 +31,7 @@ class VpnGenerateCommand extends Command
 
         try {
             $this->info(
-                (new GenerateConnection($this->argument('uuid'), $this->argument('address')))->execute()
+                (new GenerateConnection($this->argument('uuid')))->execute()
             );
         } catch (\Exception $exception) {
             $this->error($exception->getMessage());
