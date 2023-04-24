@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Client\ClientListController;
+use App\Http\Controllers\Client\GetClientConnectionController;
 use App\Http\Controllers\Client\InboundController;
 use App\Http\Controllers\Client\NewClientController;
 use App\Http\Controllers\Client\RenewClientController;
@@ -37,9 +38,11 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'clients', 'as' => 'client.'], function () {
         Route::get('/', ClientListController::class)->name('list');
 
-        Route::get('{clientId}/renew', [RenewClientController::class, 'show'])->name('renew');
-        Route::put('{clientId}/renew', [RenewClientController::class, 'update'])->name('renew-client.update');
-
+        Route::group(['prefix' => '{clientId}'], function () {
+            Route::get('renew', [RenewClientController::class, 'show'])->name('renew');
+            Route::put('renew', [RenewClientController::class, 'update'])->name('renew-client.update');
+            Route::get('get-connection', GetClientConnectionController::class)->name('get-client-connection');
+        });
         Route::get('create', [NewClientController::class, 'create'])->name('create');
         Route::post('store', [NewClientController::class, 'store'])->name('store');
     });

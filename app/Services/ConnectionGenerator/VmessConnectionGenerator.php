@@ -18,14 +18,12 @@ class VmessConnectionGenerator extends AbstractConnectionGenerator
         'port' => '443',
         'ps' => 'email',
         'scy' => 'auto',
-        'sni' => 'sni',
         'tls' => 'tls',
         'type' => '',
         'v' => '2',
     ];
 
     public function __construct(
-        protected string  $address,
         protected string  $id,
         protected string  $email,
         protected Inbound $inbound
@@ -40,13 +38,12 @@ class VmessConnectionGenerator extends AbstractConnectionGenerator
     {
         $streamSettings = json_decode($this->inbound->stream_settings, true);
         $connection = $this->template;
-        $connection['add'] = $this->address;
-        $connection['host'] = $this->inbound->remark;
+        $connection['add'] = $this->inbound->remark;
+        $connection['host'] = "";
         $connection['id'] = $this->id;
         $connection['net'] = $streamSettings['network'];
         $connection['path'] = $streamSettings['wsSettings']['path'];
         $connection['ps'] = $this->email;
-        $connection['sni'] = $this->inbound->remark;
         $connection['tls'] = $streamSettings['security'];
         return "{$this->inbound->protocol}://" . base64_encode(json_encode($connection));
     }

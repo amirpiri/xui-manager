@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ServerUser extends Model
 {
-    protected $connection = 'sqlite_secondary';
+    protected $connection = 'xui';
 
     protected $table = 'users';
 

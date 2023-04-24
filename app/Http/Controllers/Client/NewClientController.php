@@ -13,12 +13,18 @@ use App\Models\Inbound;
 use App\Models\Renew;
 use App\Models\User;
 use App\Models\UserClientTraffic;
+use App\Services\Contracts\XuiEnglishRequestServiceInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class NewClientController extends Controller
 {
+
+    public function __construct(protected XuiEnglishRequestServiceInterface $xuiEnglishRequestService)
+    {
+    }
+
     public function create(CreateNewClientTrafficRequest $request)
     {
         $inbounds = Inbound::all();
@@ -59,12 +65,13 @@ class NewClientController extends Controller
                 'clients' => $clients,
                 'disableInsecureEncryption' => $inboundSettings['disableInsecureEncryption']
             ];
-            $inboundRow->settings = $settings;
-            Inbound::where('id', $request->inbound)->update($inboundRow->toArray());
+            $inboundRow->settings = json_encode($settings, JSON_PRETTY_PRINT);
             UserClientTraffic::create([
                 'user_id' => $request->user,
                 'client_traffic_id' => $clientTraffic->id
             ]);
+            $inboundRow->enable = (bool)$inboundRow->enable;
+            $this->xuiEnglishRequestService->updateInbound($request->inbound, $inboundRow->toArray());
             Renew::create([
                 'type' => RenewTypeEnum::CREATE->value,
                 'user_id' => $request->user,
@@ -73,6 +80,6 @@ class NewClientController extends Controller
                 'status' => RenewStatusEnum::RENEW->value,
             ]);
         });
-        return view('dashboard');
+        return redirect(route('dashboard'));
     }
 }

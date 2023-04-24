@@ -17,4 +17,5 @@ return [
     'renew' => 'Renew',
     'actions' => 'Actions',
     'create' => 'Create',
+    'generate' => 'Generate'
 ];
