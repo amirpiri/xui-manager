@@ -34,7 +34,7 @@ class NewClientController extends Controller
 
     public function store(StoreNewClientTrafficRequest $request)
     {
-        DB::transaction(function () use ($request) {
+        $clientTraffic = DB::transaction(function () use ($request) {
             $expireTime = Carbon::tomorrow()->addMonth()->timestamp * 1000;
             $clientTraffic = ClientTraffic::create([
                 'inbound_id' => $request->inbound,
@@ -61,10 +61,8 @@ class NewClientController extends Controller
                 $clients[] = $client;
             }
             $clients[] = $userSetting;
-            $settings = [
-                'clients' => $clients,
-                'disableInsecureEncryption' => $inboundSettings['disableInsecureEncryption']
-            ];
+            $settings = $inboundSettings;
+            $settings['clients'] = $clients;
             $inboundRow->settings = json_encode($settings, JSON_PRETTY_PRINT);
             UserClientTraffic::create([
                 'user_id' => $request->user,
@@ -79,7 +77,9 @@ class NewClientController extends Controller
                 'traffic' => $request->total * config('traffic_client.convert_to_gb'),
                 'status' => RenewStatusEnum::RENEW->value,
             ]);
+            return $clientTraffic;
         });
-        return redirect(route('dashboard'));
+
+        return redirect(route('client.get-client-connection', ['clientId' => $clientTraffic->id]));
     }
 }

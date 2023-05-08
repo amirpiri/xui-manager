@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\ClientTraffic;
 use App\Models\Inbound;
+use App\Services\Contracts\XuiEnglishRequestServiceInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Console\Command;
 
 class TransferClientToCloudflareCommand extends Command
@@ -13,7 +15,7 @@ class TransferClientToCloudflareCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'inbound:transfer {uuid}';
+    protected $signature = 'inbound:transfer {uuid} {inboundId}';
 
     /**
      * The console command description.
@@ -23,10 +25,19 @@ class TransferClientToCloudflareCommand extends Command
     protected $description = 'Command description';
 
     /**
+     * @var XuiEnglishRequestServiceInterface
+     */
+    protected XuiEnglishRequestServiceInterface $xuiRequestService;
+
+    /**
      * Execute the console command.
+     * @throws GuzzleException
      */
     public function handle()
     {
+        /** @var XuiEnglishRequestServiceInterface $xuiRequestService */
+        $this->xuiRequestService = resolve(XuiEnglishRequestServiceInterface::class);
+
         $uuid = $this->argument('uuid');
         $inbound = Inbound::where('settings', 'like', "%$uuid%")->first();
         $configMustTransferred = [];
@@ -41,17 +52,44 @@ class TransferClientToCloudflareCommand extends Command
                 $newInboundConfig['clients'][] = $client;
             }
         }
+        $targetInbound = $this->updateSourceInbound($inbound, $newInboundConfig);
 
-        Inbound::where('id', $inbound->id)->update(['settings' => json_encode($newInboundConfig)]);
-        $cloudflareInbound = Inbound::where('id', config('traffic_client.cloudflare_inbound_id'))
-            ->first();
-        $oldConfig = json_decode($cloudflareInbound->settings, true);
-        $oldConfig['clients'][] = $configMustTransferred;
-        Inbound::where('id', config('traffic_client.cloudflare_inbound_id'))
-            ->update(['settings' => json_encode($oldConfig)]);
+        $this->updateDestinationInbound($targetInbound, $configMustTransferred);
+
+
         ClientTraffic::where('email', $configMustTransferred['email'])
             ->update([
-                'inbound_id' => config('traffic_client.cloudflare_inbound_id'),
+                'inbound_id' => $this->argument('inboundId'),
             ]);
+    }
+
+    /**
+     * @param Inbound $inbound
+     * @param array $newInboundConfig
+     * @return Inbound
+     * @throws GuzzleException
+     */
+    protected function updateSourceInbound(Inbound $inbound, array $newInboundConfig): Inbound
+    {
+        $inboundUpdating = $inbound->toArray();
+        $inboundUpdating['settings'] = $newInboundConfig;
+        $inboundUpdating['enable'] = (bool)$inboundUpdating['enable'];
+        $this->xuiRequestService->updateInbound($inbound->id, $inboundUpdating);
+        return Inbound::where('id', $this->argument('inboundId'))
+            ->first();
+    }
+
+    /**
+     * @param Inbound $targetInbound
+     * @param array $configMustTransferred
+     * @return void
+     * @throws GuzzleException
+     */
+    protected function updateDestinationInbound(Inbound $targetInbound, array $configMustTransferred): void
+    {
+        $targetInboundUpdating = $targetInbound->toArray();
+        $targetInboundUpdating['settings']['clients'][] = $configMustTransferred;
+        $targetInboundUpdating['enable'] = (bool)$targetInboundUpdating['enable'];
+        $this->xuiRequestService->updateInbound($this->argument('inboundId'), $targetInboundUpdating);
     }
 }
