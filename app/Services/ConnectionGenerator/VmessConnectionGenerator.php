@@ -26,7 +26,8 @@ class VmessConnectionGenerator extends AbstractConnectionGenerator
     public function __construct(
         protected string  $id,
         protected string  $email,
-        protected Inbound $inbound
+        protected Inbound $inbound,
+        protected $url
     )
     {
     }
