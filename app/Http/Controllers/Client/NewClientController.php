@@ -62,7 +62,7 @@ class NewClientController extends Controller
             }
             $clients[] = $userSetting;
             $settings = $inboundSettings;
-            $settings['clients'] = $clients;
+            $settings['
             $inboundRow->settings = json_encode($settings, JSON_PRETTY_PRINT);
             UserClientTraffic::create([
                 'user_id' => $request->user,
