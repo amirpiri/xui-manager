@@ -276,7 +276,11 @@ class CustomWebhookHandler extends WebhookHandler
 
     private function getInbounds()
     {
-        return Inbound::whereIn('id', config('telegraph.xui.inbounds'))->get();
+        if (is_null(config('telegraph.xui.inbound_excludes'))) {
+            return Inbound::all();
+        } else {
+            return Inbound::whereNotIn('id', explode(',', config('telegraph.xui.inbounds')))->get();
+        }
     }
 
     public function yesCheckPreviousAccount()
@@ -312,14 +316,12 @@ class CustomWebhookHandler extends WebhookHandler
     public function getConfigLink()
     {
         $url = $this->data->get('url');
-        $inboundRow = Inbound::where('settings', 'like', '%'. $this->chat->client_uuid.'%')
-            ->first();
 
         if (empty($this->chat->client_uuid)) {
             Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->message('آیدی شما ثبت نشده. برای ثبت آیدی دکمه حساب کاربری زیر را بزنید.')->send();
         } else {
-            $connection = (new GenerateConnection($this->chat->client_uuid,$url))->execute();
+            $connection = (new GenerateConnection($this->chat->client_uuid))->execute();
             Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->markdownV2(
                 '```' .

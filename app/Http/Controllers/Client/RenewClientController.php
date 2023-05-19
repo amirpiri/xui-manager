@@ -56,7 +56,8 @@ class RenewClientController extends Controller
                 $inboundClients[$key]['expiryTime'] = $expireTime;
             }
         }
-        $settings = ['clients' => $inboundClients, 'disableInsecureEncryption' => false];
+        $settings = json_decode($inboundRow->settings);
+        $settings->clients = $inboundClients;
         $inboundRow->enable = (bool)$inboundRow->enable;
         $inboundRow->settings = json_encode($settings, JSON_PRETTY_PRINT);
         DB::transaction(function () use ($clientRow, $inboundRow, $clientId, $total, $expireTime, $request) {
@@ -81,6 +82,6 @@ class RenewClientController extends Controller
 
         $this->xuiRequestService->updateInbound($clientRow->inbound_id, $inboundRow->toArray());
 
-        return redirect(route('dashboard'));
+        return redirect(route('client.get-client-connection', ['clientId' => $clientId]));
     }
 }

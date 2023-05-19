@@ -19,10 +19,8 @@ class VlessConnectionGenerator extends AbstractConnectionGenerator
      */
     public function generate(): string
     {
-        return 'vless://' . $this->id . '@' . $this->address . ':443?sni=' .
-        config('telegraph.xui.active_domain') .
-        '&security=tls&type=ws&path=/chat&host=' .
-        config('telegraph.xui.active_domain') .
-        '#' . $this->inbound->remark;
+        $streamSettings = json_decode($this->inbound->stream_settings, true);
+        return "vless://{$this->id}@{$this->inbound->remark}:443?type={$streamSettings['network']}&security={$streamSettings['security']}&path={$streamSettings['wsSettings']['path']}&sni={$this->inbound->remark}#$this->email";
+
     }
 }
