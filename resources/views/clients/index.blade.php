@@ -17,6 +17,7 @@
                 <th>{{__('xui.expire_date')}}</th>
                 <th>{{__('xui.remaining_expire_date')}}</th>
                 <th>{{__('xui.actions')}}</th>
+
             </tr>
             </thead>
             <tbody>
