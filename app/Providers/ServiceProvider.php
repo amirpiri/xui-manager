@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use App\Services\Contracts\InboundServiceInterface;
+use App\Services\ClientTrafficService;
+use App\Services\Contracts\ClientTrafficServiceInterface;
 use App\Services\Contracts\XuiEnglishRequestServiceInterface;
-use App\Services\InboundService;
 use App\Services\XuiEnglishEnglishRequestService;
 use Illuminate\Support\ServiceProvider as MainServiceProvider;
 
@@ -18,6 +18,10 @@ class ServiceProvider extends MainServiceProvider
         $this->app->bind(
             XuiEnglishRequestServiceInterface::class,
             XuiEnglishEnglishRequestService::class
+        );
+        $this->app->bind(
+            ClientTrafficServiceInterface::class,
+            ClientTrafficService::class
         );
     }
 

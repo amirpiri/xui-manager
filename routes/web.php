@@ -5,6 +5,7 @@ use App\Http\Controllers\Client\GetClientConnectionController;
 use App\Http\Controllers\Client\InboundController;
 use App\Http\Controllers\Client\NewClientController;
 use App\Http\Controllers\Client\RenewClientController;
+use App\Http\Controllers\Client\TransferClientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionController;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +43,8 @@ Route::middleware('auth')->group(function () {
             Route::get('renew', [RenewClientController::class, 'show'])->name('renew');
             Route::put('renew', [RenewClientController::class, 'update'])->name('renew-client.update');
             Route::get('get-connection', GetClientConnectionController::class)->name('get-client-connection');
+            Route::get('transfer', [TransferClientController::class, 'show'])->name('transfer-client.show');
+            Route::post('transfer', [TransferClientController::class, 'store'])->name('transfer-client.store');
         });
         Route::get('create', [NewClientController::class, 'create'])->name('create');
         Route::post('store', [NewClientController::class, 'store'])->name('store');

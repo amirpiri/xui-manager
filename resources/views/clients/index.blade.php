@@ -42,6 +42,12 @@
                            title="{{__('xui.generate')}}">
                             <i class="fa-sharp fa-solid fa-download"></i>
                         </a>
+                        @if(auth()->user()->role === \App\Enums\UserRoleEnum::ADMIN->value)
+                            <a href="{{route('client.transfer-client.show',['clientId' => $client->id])}}"
+                               title="{{__('Transfer')}}">
+                                <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                            </a>
+                        @endif
                     </td>
                 </tr>
             @endforeach
