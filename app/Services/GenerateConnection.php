@@ -11,6 +11,7 @@ class GenerateConnection
 
     public function __construct(
         private string $uuid,
+        private string $url = ''
     )
     {
     }
@@ -29,7 +30,8 @@ class GenerateConnection
         return (new $class(
             $this->uuid,
             $client->email,
-            $inbound
+            $inbound,
+            $this->url
         ))->generate();
 
     }

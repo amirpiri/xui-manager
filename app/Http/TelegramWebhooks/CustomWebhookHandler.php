@@ -276,10 +276,14 @@ class CustomWebhookHandler extends WebhookHandler
 
     private function getInbounds()
     {
-        if (is_null(config('telegraph.xui.inbound_excludes'))) {
-            return Inbound::all();
+        if (!((bool)config('telegraph.xui.connection_generator_is_custom'))) {
+            if (is_null(config('telegraph.xui.inbound_excludes'))) {
+                return Inbound::all();
+            } else {
+                return Inbound::whereNotIn('id', explode(',', config('telegraph.xui.inbounds')))->get();
+            }
         } else {
-            return Inbound::whereNotIn('id', explode(',', config('telegraph.xui.inbounds')))->get();
+            return Inbound::whereIn('id', config('telegraph.xui.inbounds'))->get();
         }
     }
 
@@ -321,7 +325,7 @@ class CustomWebhookHandler extends WebhookHandler
             Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->message('آیدی شما ثبت نشده. برای ثبت آیدی دکمه حساب کاربری زیر را بزنید.')->send();
         } else {
-            $connection = (new GenerateConnection($this->chat->client_uuid))->execute();
+            $connection = (new GenerateConnection($this->chat->client_uuid, $url))->execute();
             Telegraph::chat($this->chat)->chatAction(ChatActions::TYPING)->send();
             $this->chat->markdownV2(
                 '```' .

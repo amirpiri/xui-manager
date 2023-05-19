@@ -121,6 +121,7 @@ return [
     'xui' => [
         'inbounds' => explode(',', env('XUI_INBOUNDS', '1')),
         'inbound_excludes' => env('XUI_INBOUND_EXCLUDES'),
+        'connection_generator_is_custom' => env('CONNECTION_GENERATOR_IS_CUSTOM', true),
         'support_telegram_account' => env('XUI_SUPPORT_TELEGRAM_ACCOUNT'),
         'active_domain' => env('XUI_ACTIVE_DOMAIN'),
         'android_tutorial_video_path' => env('XUI_ANDROID_TUTORIAL_VIDEO_PATH'),
