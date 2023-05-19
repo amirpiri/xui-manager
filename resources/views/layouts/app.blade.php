@@ -27,7 +27,11 @@
             aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+    <div class="w-100">
+        <form method="GET" action="{{ route('client.list') }}">
+            <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search" name="search">
+        </form>
+    </div>
     <div class="navbar-nav">
         <div class="nav-item text-nowrap">
             <form method="POST" action="{{ route('logout') }}">
