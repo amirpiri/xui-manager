@@ -1,49 +1,58 @@
 <x-app-layout>
 @php
-    $remaining = ($client->up + $client->down) / $client->total;
+    $remaining = $client->total - ($client->up + $client->down);
     $convertToGB = (1024 * 1024 * 1024);
     $expireDateTime = \Carbon\Carbon::createFromTimestamp(($client->expiry_time / 1000));
 @endphp
 <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')"/>
-    <form method="POST" action="{{ route('client.renew-client.update',['clientId' => $client->id]) }}">
-        @method('PUT')
-        @csrf
-        <div class="container-fluid mb-3">
-            <div class="row bg-white">
-                <p>
-                    {{__('Total traffic:')}} {{number_format($client->total / $convertToGB,2)}}GB
-                </p>
-                <p>
-                    {{__('Remaining:')}} {{$remaining / $convertToGB}} GB
-                </p>
-                <p>
-                    {{__('Email:')}} {{$client->email}}
-                </p>
-                <p>
-                    {{__('Expire:')}} {{$expireDateTime->toDateTimeString()}}
-                </p>
-                <p>
-                    {{__('Next expire time:')}} {{\Carbon\Carbon::today()->addMonth()->toDateTimeString()}}
-                </p>
+    <div class="mt-5">
+        <form class="row g-3" method="POST"
+              action="{{ route('client.renew-client.update',['clientId' => $client->id]) }}">
+            @method('PUT')
+            @csrf
 
-                <select name="traffic" class="form-select" aria-label="Default select example">
-                    <option selected>Choose a traffic</option>
+            <div class="col-6">
+                {{__('Total traffic:')}}
+                <span class="fw-bold">{{number_format($client->total / $convertToGB,2)}}GB</span>
+            </div>
+            <div class="col-6">
+                {{__('Remaining:')}} <span class="fw-bold">{{$remaining / $convertToGB}} GB</span>
+            </div>
+            <div class="col-6">
+                {{__('Email:')}} <span class="fw-bold">{{$client->email}}</span>
+            </div>
+            <div class="col-6">
+                {{__('Expire:')}} <span class="fw-bold">{{$expireDateTime->toDateTimeString()}}</span>
+            </div>
+            <div class="col-6">
+                {{__('Next expire time:')}} <span
+                    class="fw-bold">{{\Carbon\Carbon::today()->addMonth()->toDateTimeString()}}</span>
+            </div>
+            <div class="col-6">
+                {{__('Next expire time jalali:')}} <span
+                    class="fw-bold">{{Morilog\Jalali\Jalalian::forge((\Carbon\Carbon::today()->addMonth()->toDateTimeString()))->toDateTimeString()}}</span>
+            </div>
+            <div class="col-12">
+                <label for="traffic" class="form-label">{{__('Traffic:')}}</label>
+                <select id="traffic" name="traffic" class="form-select form-select-lg"
+                        aria-label="Default select example">
+                    <option selected>{{__('Choose a traffic')}}</option>
                     <option value="50">50GB</option>
                     <option value="100">100GB</option>
                     <option value="150">150GB</option>
                     <option value="200">200GB</option>
                 </select>
-                <x-input-error :messages="$errors->get('traffic')" class="mt-2" />
+                <x-input-error :messages="$errors->get('traffic')" class="mt-2"/>
             </div>
-        </div>
-        <x-primary-button class="ml-3" style="color: #000 !important;">
-            {{ __('Submit') }}
-        </x-primary-button>
-        <a href="{{route('client.list')}}" style="color:#000 !important; border-radius: 0.375rem;padding: 10px 20px;background-color: rgb(229 231 235 / var(--tw-bg-opacity));">
-            {{ __('Reject') }}
-        </a>
-    </form>
+            <div class="col-12">
+                <button class="btn btn-primary">
+                    {{ __('Submit') }}
+                </button>
+                <a class="btn btn-secondary" href="{{route('client.list')}}">{{ __('Reject') }}</a>
+            </div>
+        </form>
+    </div>
 
 
 </x-app-layout>
