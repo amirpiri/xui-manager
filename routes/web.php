@@ -8,6 +8,7 @@ use App\Http\Controllers\Client\RenewClientController;
 use App\Http\Controllers\Client\TransferClientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\UserClientTrafficController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -49,6 +50,9 @@ Route::middleware('auth')->group(function () {
         Route::get('create', [NewClientController::class, 'create'])->name('create');
         Route::post('store', [NewClientController::class, 'store'])->name('store');
     });
+
+    Route::get('user-client', [UserClientTrafficController::class, 'show'])->name('traffic-client-user.show');
+    Route::post('user-client', [UserClientTrafficController::class, 'store'])->name('traffic-client-user.store');
     Route::get('/inbounds', InboundController::class)->name('inbounds');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

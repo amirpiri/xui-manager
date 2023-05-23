@@ -4,6 +4,7 @@
     <div class="container bg-white">
         <div class="row">
             <span class="col-12 p-5" style="overflow-wrap: break-word">{{$connection}}</span>
+            <span>{{ \SimpleSoftwareIO\QrCode\Facades\QrCode::size(200)->generate($connection) }}</span>
         </div>
     </div>
 
