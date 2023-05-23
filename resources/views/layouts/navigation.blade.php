@@ -27,6 +27,13 @@
                     </a>
 
                 </li>
+                <li class="nav-item">
+                    <span data-feather="home"></span>
+                    <a href="{{route('traffic-client-user.show')}}" class="nav-link active" aria-current="page">
+                        {{ __('Assign clients to users') }}
+                    </a>
+
+                </li>
             @endif
         </ul>
     </div>
