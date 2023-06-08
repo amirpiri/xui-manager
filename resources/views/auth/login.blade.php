@@ -79,7 +79,7 @@
             <!-- Remember Me -->
             <div class="checkbox mb-3">
                 <label>
-                    <input name="remember" id="remember_me" type="checkbox" value="remember-me">{{__('Remember me')}}
+                    <input name="remember" id="remember_me" type="checkbox">{{__('Remember me')}}
                 </label>
             </div>
             <button class="w-100 btn btn-lg btn-primary" type="submit">{{ __('Log in') }}</button>

@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
         });
         Route::get('create', [NewClientController::class, 'create'])->name('create');
         Route::post('store', [NewClientController::class, 'store'])->name('store');
+        Route::get('excluded',\App\Http\Controllers\Client\ExcludedClientsController::class)->name('excluded-clients');
     });
 
     Route::get('user-client', [UserClientTrafficController::class, 'show'])->name('traffic-client-user.show');

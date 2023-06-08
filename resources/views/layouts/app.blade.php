@@ -29,7 +29,7 @@
     </button>
     <div class="w-100">
         <form method="GET" action="{{ route('client.list') }}">
-            <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search" name="search">
+            <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search" name="search" value="{{request()->get('search','')}}">
         </form>
     </div>
     <div class="navbar-nav">

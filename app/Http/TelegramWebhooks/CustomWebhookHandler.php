@@ -15,6 +15,7 @@ use DefStudio\Telegraph\Keyboard\Keyboard;
 use DefStudio\Telegraph\Keyboard\ReplyButton;
 use DefStudio\Telegraph\Keyboard\ReplyKeyboard;
 use DefStudio\Telegraph\Models\TelegraphChat;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Stringable;
 use Morilog\Jalali\Jalalian;
@@ -274,17 +275,12 @@ class CustomWebhookHandler extends WebhookHandler
         return $clientData ?? null;
     }
 
-    private function getInbounds()
+    /**
+     * @return Collection
+     */
+    private function getInbounds(): Collection
     {
-        if (!((bool)config('telegraph.xui.connection_generator_is_custom'))) {
-            if (is_null(config('telegraph.xui.inbound_excludes'))) {
-                return Inbound::all();
-            } else {
-                return Inbound::whereNotIn('id', explode(',', config('telegraph.xui.inbounds')))->get();
-            }
-        } else {
-            return Inbound::whereIn('id', config('telegraph.xui.inbounds'))->get();
-        }
+        return (new Inbound)->getInbounds();
     }
 
     public function yesCheckPreviousAccount()

@@ -35,6 +35,12 @@
 
                 </li>
             @endif
+            <li class="nav-item">
+                <a href="{{route('client.excluded-clients')}}" class="nav-link active" aria-current="page">
+                    <span data-feather="home"></span>
+                    {{ __('Disable User') }}
+                </a>
+            </li>
         </ul>
     </div>
 </nav>
