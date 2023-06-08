@@ -48,9 +48,9 @@ class ClientTraffic extends Model
         ])->leftJoin('client_traffics', 'inbounds.id', '=', 'client_traffics.inbound_id');
 
         if ($excludedUsers === false) {
-            $result = $result->whereNotIn('client_traffics.id', explode(',', config('telegraph.xui.inbound_excludes')));
+            $result = $result->whereNotIn('inbounds.id', explode(',', config('telegraph.xui.inbound_excludes')));
         } else {
-            $result = $result->whereIn('client_traffics.id', explode(',', config('telegraph.xui.inbound_excludes')));
+            $result = $result->whereIn('inbounds.id', explode(',', config('telegraph.xui.inbound_excludes')));
         }
         if ($user->role === UserRoleEnum::RESELLER->value) {
             $userId = UserClientTraffic::select(['client_traffic_id'])
